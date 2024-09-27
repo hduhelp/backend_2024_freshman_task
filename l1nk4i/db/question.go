@@ -11,18 +11,28 @@ func CreateQuestion(question *Question) error {
 	return nil
 }
 
-func GetQuestion(uuid string) (*Question, error) {
+func GetQuestionByQuestionID(questionID string) (*Question, error) {
 	var question Question
-	err := db.Where("uuid = ?", uuid).First(&question).Error
+	err := db.Where("question_id = ?", questionID).First(&question).Error
 	if err != nil {
-		log.Printf("[ERROR] Get Question failed %s\n", err.Error())
+		log.Printf("[ERROR] Get Question by question_id failed %s\n", err.Error())
 		return nil, err
 	}
 	return &question, nil
 }
 
-func DeleteQuestion(uuid string) error {
-	err := db.Unscoped().Where("uuid = ?", uuid).Delete(&Question{}).Error
+func GetQuestionByUserID(userID string) (*[]Question, error) {
+	var questions []Question
+	err := db.Where("user_id = ?", userID).Limit(100).Find(&questions).Error
+	if err != nil {
+		log.Printf("[ERROR] Get Questions by user_id failed %s\n", err.Error())
+		return nil, err
+	}
+	return &questions, nil
+}
+
+func DeleteQuestion(questionID string) error {
+	err := db.Unscoped().Where("question_id = ?", questionID).Delete(&Question{}).Error
 	if err != nil {
 		log.Printf("[ERROR] Delete Question failed %s\n", err.Error())
 		return err
@@ -30,11 +40,22 @@ func DeleteQuestion(uuid string) error {
 	return nil
 }
 
-func UpdateQuestion(uuid, title, content string) error {
-	err := db.Model(&Question{}).Where("uuid = ?", uuid).Update("title", title).Update("content", content).Error
+func UpdateQuestion(questionID, title, content string) error {
+	err := db.Model(&Question{}).Where("question_id = ?", questionID).Updates(Question{Title: title, Content: content}).Error
 	if err != nil {
 		log.Printf("[ERROR] Update Question failed %s\n", err.Error())
 		return err
 	}
 	return nil
+}
+
+func SearchQuestions(content string) (*[]Question, error) {
+	var questions []Question
+	searchPattern := "%" + content + "%"
+	err := db.Where("title LIKE ? OR content LIKE ?", searchPattern, searchPattern).Limit(20).Find(&questions).Error
+	if err != nil {
+		log.Printf("[ERROR] Search Questions failed %s\n", err.Error())
+		return nil, err
+	}
+	return &questions, nil
 }

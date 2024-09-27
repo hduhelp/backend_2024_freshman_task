@@ -10,7 +10,7 @@ import (
 
 type User struct {
 	gorm.Model
-	UUID string `gorm:"not null;column:uuid;unique;type:varchar(36)"`
+	UserID string `gorm:"not null;column:user_id;unique;type:varchar(36)"`
 
 	Username string `gorm:"not null;column:username;unique"`
 	Password string `gorm:"not null;column:password"`
@@ -19,8 +19,11 @@ type User struct {
 
 type Question struct {
 	gorm.Model
-	UUID   string `gorm:"not null;column:uuid;unique;type:varchar(36)"`
-	UserId string `gorm:"not null;column:userid;unique"`
+	QuestionID string `gorm:"not null;column:question_id;unique;type:varchar(36)"`
+	UserID     string `gorm:"not null;column:user_id;type:varchar(36)"`
+
+	BestAnswerID string `gorm:"column:best_answer_id;type:varchar(36)"`
+	//IsAccessible bool   `gorm:"not null;column:is_accessible;type:bool;default:false"`
 
 	Title   string `gorm:"not null;column:title"`
 	Content string `gorm:"not null;column:content"`
@@ -28,9 +31,9 @@ type Question struct {
 
 type Answer struct {
 	gorm.Model
-	UUID       string `gorm:"not null;column:uuid;unique;type:varchar(36)"`
-	UserId     string `gorm:"not null;column:userid;unique"`
-	QuestionId string `gorm:"not null;column:questionid;unique"`
+	AnswerID   string `gorm:"not null;column:answer_id;unique;type:varchar(36)"`
+	UserID     string `gorm:"not null;column:user_id;type:varchar(36)"`
+	QuestionID string `gorm:"not null;column:question_id;"`
 
 	Content string `gorm:"not null;column:content"`
 }

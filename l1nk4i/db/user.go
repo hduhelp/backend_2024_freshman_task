@@ -23,7 +23,7 @@ func GetUserByUsername(username string) (*User, error) {
 
 func GetUserByUUID(uuid string) (*User, error) {
 	var user User
-	err := db.Where("uuid = ?", uuid).First(&user).Error
+	err := db.Where("user_id = ?", uuid).First(&user).Error
 	if err != nil {
 		log.Printf("[ERROR] Get user failed: %s\n", err.Error())
 		return nil, err
