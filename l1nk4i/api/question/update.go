@@ -8,10 +8,11 @@ import (
 )
 
 func Update(c *gin.Context) {
+	questionID := c.Param("question-id")
+
 	var questionInfo struct {
-		QuestionID string `json:"question_id"`
-		Title      string `json:"title"`
-		Content    string `json:"content"`
+		Title   string `json:"title"`
+		Content string `json:"content"`
 	}
 
 	if err := c.ShouldBind(&questionInfo); err != nil {
@@ -27,7 +28,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	question, err := db.GetQuestionByQuestionID(questionInfo.QuestionID)
+	question, err := db.GetQuestionByQuestionID(questionID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid question_id"})
 		return
@@ -39,7 +40,7 @@ func Update(c *gin.Context) {
 	}
 
 	// Update question
-	err = db.UpdateQuestion(questionInfo.QuestionID, questionInfo.Title, questionInfo.Content)
+	err = db.UpdateQuestion(questionID, questionInfo.Title, questionInfo.Content)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "update question error"})
 		return

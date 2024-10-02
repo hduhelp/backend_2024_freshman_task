@@ -20,29 +20,28 @@ func Run() {
 
 	apiGroup := r.Group("/api")
 	{
-		userApiGroup := apiGroup.Group("/user")
+		userApiGroup := apiGroup.Group("/users")
 		{
 			userApiGroup.POST("/login", user.Login)
 			userApiGroup.POST("/register", user.Register)
-			userApiGroup.GET("/logout", user.Logout)
+			userApiGroup.POST("/logout", user.Logout)
 			userApiGroup.GET("/userinfo", user.UserInfo)
 		}
-		questionApiGroup := apiGroup.Group("/question")
+		questionApiGroup := apiGroup.Group("/questions")
 		{
-			questionApiGroup.POST("/create", question.Create)
-			questionApiGroup.POST("/delete", question.Delete)
-			questionApiGroup.POST("/update", question.Update)
-			questionApiGroup.POST("/get", question.Get)
-
-			questionApiGroup.POST("/list", question.List)
-			questionApiGroup.POST("/search", question.Search)
+			questionApiGroup.POST("/", question.Create)
+			questionApiGroup.DELETE("/:question-id", question.Delete)
+			questionApiGroup.PUT("/:question-id", question.Update)
+			questionApiGroup.GET("/:question-id", question.Get)
+			questionApiGroup.GET("/", question.List)
+			questionApiGroup.GET("/search", question.Search)
+			questionApiGroup.POST("/:question-id/answers", answer.Create)
+			questionApiGroup.GET("/:question-id/answers", answer.Get)
 		}
-		answerApiGroup := apiGroup.Group("/answer")
+		answerApiGroup := apiGroup.Group("/answers")
 		{
-			answerApiGroup.POST("/create", answer.Create)
-			answerApiGroup.POST("/delete", answer.Delete)
-			answerApiGroup.POST("/update", answer.Update)
-			answerApiGroup.POST("/get", answer.Get)
+			answerApiGroup.DELETE("/:answer-id", answer.Delete)
+			answerApiGroup.PUT("/:answer-id", answer.Update)
 		}
 	}
 

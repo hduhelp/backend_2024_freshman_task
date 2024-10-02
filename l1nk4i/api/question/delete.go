@@ -8,14 +8,7 @@ import (
 )
 
 func Delete(c *gin.Context) {
-	var questionInfo struct {
-		QuestionID string `json:"question_id"`
-	}
-
-	if err := c.ShouldBind(&questionInfo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
-		return
-	}
+	questionID := c.Param("question-id")
 
 	// Verify user identity
 	session := sessions.Default(c)
@@ -25,7 +18,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	question, err := db.GetQuestionByQuestionID(questionInfo.QuestionID)
+	question, err := db.GetQuestionByQuestionID(questionID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid question_id"})
 		return
@@ -37,14 +30,14 @@ func Delete(c *gin.Context) {
 	}
 
 	// Delete question
-	err = db.DeleteQuestion(questionInfo.QuestionID)
+	err = db.DeleteQuestion(questionID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "delete question error"})
 		return
 	}
 
 	// Delete answers to the question
-	err = deleteAnswers(questionInfo.QuestionID)
+	err = deleteAnswers(questionID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "delete answers error"})
 		return

@@ -8,9 +8,10 @@ import (
 )
 
 func Update(c *gin.Context) {
+	answerID := c.Param("answer-id")
+
 	var answerInfo struct {
-		AnswerID string `json:"answer_id"`
-		Content  string `json:"content"`
+		Content string `json:"content"`
 	}
 
 	if err := c.ShouldBindJSON(&answerInfo); err != nil {
@@ -26,7 +27,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	answer, err := db.GetAnswerByAnswerID(answerInfo.AnswerID)
+	answer, err := db.GetAnswerByAnswerID(answerID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid answer_id"})
 		return
@@ -38,7 +39,7 @@ func Update(c *gin.Context) {
 	}
 
 	// Update answer
-	err = db.UpdateAnswer(answerInfo.AnswerID, answerInfo.Content)
+	err = db.UpdateAnswer(answerID, answerInfo.Content)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid answer"})
 		return

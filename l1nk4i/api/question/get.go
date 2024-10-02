@@ -8,16 +8,9 @@ import (
 
 // Get gets question by question_id
 func Get(c *gin.Context) {
-	var questionInfo struct {
-		QuestionID string `json:"question_id"`
-	}
+	questionID := c.Param("question-id")
 
-	if err := c.ShouldBind(&questionInfo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
-		return
-	}
-
-	question, err := db.GetQuestionByQuestionID(questionInfo.QuestionID)
+	question, err := db.GetQuestionByQuestionID(questionID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid question_id"})
 		return

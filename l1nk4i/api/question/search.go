@@ -7,15 +7,9 @@ import (
 )
 
 func Search(c *gin.Context) {
-	var searchInfo struct {
-		Content string `json:"content"`
-	}
+	searchContent := c.Query("content")
 
-	if err := c.ShouldBind(&searchInfo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
-	}
-
-	questions, err := db.SearchQuestions(searchInfo.Content)
+	questions, err := db.SearchQuestions(searchContent)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid content"})
 	}

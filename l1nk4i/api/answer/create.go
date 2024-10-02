@@ -9,9 +9,10 @@ import (
 )
 
 func Create(c *gin.Context) {
+	questionID := c.Param("question-id")
+
 	var answerInfo struct {
-		QuestionID string `json:"question_id"`
-		Content    string `json:"content"`
+		Content string `json:"content"`
 	}
 
 	if err := c.ShouldBind(&answerInfo); err != nil {
@@ -27,7 +28,7 @@ func Create(c *gin.Context) {
 	}
 
 	// Verify that the question exists
-	_, err := db.GetQuestionByQuestionID(answerInfo.QuestionID)
+	_, err := db.GetQuestionByQuestionID(questionID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid question_id"})
 		return
@@ -36,7 +37,7 @@ func Create(c *gin.Context) {
 	answer := db.Answer{
 		AnswerID:   uuid.New().String(),
 		UserID:     userID,
-		QuestionID: answerInfo.QuestionID,
+		QuestionID: questionID,
 		Content:    answerInfo.Content,
 	}
 	if err := db.CreateAnswer(&answer); err != nil {
