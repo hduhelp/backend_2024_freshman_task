@@ -59,3 +59,12 @@ func SearchQuestions(content string) (*[]Question, error) {
 	}
 	return &questions, nil
 }
+
+func UpdateBestAnswer(questionID, answerID string) error {
+	err := db.Model(&Question{}).Where("question_id = ?", questionID).Updates(Question{BestAnswerID: answerID}).Error
+	if err != nil {
+		log.Printf("[ERROR] Update Question benst answer failed %s\n", err.Error())
+		return err
+	}
+	return nil
+}

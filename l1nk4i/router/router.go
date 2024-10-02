@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"l1nk4i/api/admin"
 	"l1nk4i/api/answer"
 	"l1nk4i/api/question"
 	"l1nk4i/api/user"
@@ -37,11 +38,17 @@ func Run() {
 			questionApiGroup.GET("/search", question.Search)
 			questionApiGroup.POST("/:question-id/answers", answer.Create)
 			questionApiGroup.GET("/:question-id/answers", answer.Get)
+			questionApiGroup.PUT("/:question-id/best/:answer-id", question.Best)
 		}
 		answerApiGroup := apiGroup.Group("/answers")
 		{
 			answerApiGroup.DELETE("/:answer-id", answer.Delete)
 			answerApiGroup.PUT("/:answer-id", answer.Update)
+		}
+		adminApiGroup := apiGroup.Group("/admin")
+		{
+			adminApiGroup.DELETE("/questions/:question-id", admin.DeleteQuestion)
+			adminApiGroup.DELETE("/answers/:answer-id", admin.DeleteAnswer)
 		}
 	}
 
