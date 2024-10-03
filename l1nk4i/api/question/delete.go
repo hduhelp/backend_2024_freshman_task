@@ -36,28 +36,5 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	// Delete answers to the question
-	err = deleteAnswers(questionID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "delete answers error"})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{"msg": "delete question successful!"})
-}
-
-func deleteAnswers(questionID string) error {
-	answers, err := db.GetAnswersByQuestionID(questionID)
-	if err != nil {
-		return err
-	}
-
-	for _, answer := range *answers {
-		err = db.DeleteAnswer(answer.AnswerID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

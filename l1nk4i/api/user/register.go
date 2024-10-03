@@ -20,8 +20,6 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(registerInfo)
-
 	if !validateUsername(registerInfo.Username) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid Username"})
 		return
@@ -32,6 +30,12 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	exists, _ := db.GetUserByUsername(registerInfo.Username)
+	if exists != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username exists"})
+		return
+	}
+	
 	user := db.User{
 		UserID:   uuid.New().String(),
 		Username: registerInfo.Username,

@@ -21,12 +21,24 @@ func Best(c *gin.Context) {
 
 	question, err := db.GetQuestionByQuestionID(questionID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid question_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid question-id"})
 		return
 	}
 
 	if question.UserID != userid {
 		c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+		return
+	}
+
+	// Validate answer-id
+	answer, err := db.GetAnswerByAnswerID(answerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid answer-id"})
+		return
+	}
+
+	if answer.QuestionID != questionID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid answer-id"})
 		return
 	}
 
