@@ -1,0 +1,329 @@
+AAAxianyu的API文档
+1. 用户管理
+(1)注册用户
+请求方式: POST
+URL: /register
+功能: 创建一个新的用户账户。
+请求参数:
+参数	类型	描述
+username	string	用户名
+password	string	密码
+请求示例:
+Json
+{
+    "username": "testuser",
+    "password": "securepassword"
+}
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "message": "User registered successfully!"
+}
+(2)登录用户
+请求方式: POST
+URL: /login
+功能: 验证用户的用户名和密码。
+请求参数:
+参数	类型	描述
+username	string	用户名
+password	string	密码
+
+
+
+
+请求示例:
+Json
+{
+    "username": "testuser",
+    "password": "securepassword"
+}
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "message": "Login successful!"
+}
+2. 问题管理
+(1)获取问题列表
+请求方式: GET
+URL: /api/question
+功能: 获取所有问题的列表。
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+    {
+        "id": 1,
+        "content": "What is the meaning of life?",
+        "best_answer": null
+    }
+(2)创建问题
+请求方式: POST
+URL: /api/question
+功能: 创建一个新的问题。
+请求参数:
+参数	类型	描述
+content	string	问题内容
+请求示例:
+Json
+{
+    "content": "What is the meaning of life?"
+}
+
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "What is the meaning of life?",
+    "best_answer": null
+}
+(3)获取指定问题
+请求方式: GET
+URL: /api/question/:id
+功能: 获取指定ID的问题详情。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "What is the meaning of life?",
+    "best_answer": null
+}
+(4)修改指定问题
+请求方式: PUT
+URL: /api/question/:id
+功能: 修改指定ID的问题内容。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+请求参数:
+参数	类型	描述
+content	string	新问题内容
+
+
+
+
+请求示例:
+Json
+{
+    "content": "What is the purpose of life?"
+}
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "What is the purpose of life?",
+    "best_answer": null
+}
+(5)删除指定问题
+请求方式: DELETE
+URL: /api/question/:id
+功能: 删除指定ID的问题。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "message": "Question deleted successfully!"
+}
+3. 答案管理
+(1)创建答案
+请求方式: POST
+URL: /api/question/:id/answer
+功能: 对指定问题创建一个新的答案。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+
+
+
+请求参数:
+参数	类型	描述
+content	string	答案内容
+请求示例:
+Json
+{
+    "content": "The meaning of life is to find your purpose."
+}
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "The meaning of life is to find your purpose.",
+    "question_id": 1,
+    "votes": 0
+}
+(2)获取指定问题的答案列表
+请求方式: GET
+URL: /api/question/:id/answer
+功能: 获取指定问题的所有答案。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+    {
+        "id": 1,
+        "content": "The meaning of life is to find your purpose.",
+        "question_id": 1,
+        "votes": 0
+    }
+(3)获取指定答案
+请求方式: GET
+URL: /api/question/:id/answer/:answerID
+功能: 获取指定问题指定ID的答案详情。
+
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+answerID	integer	答案ID
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "The meaning of life is to find your purpose.",
+    "question_id": 1,
+    "votes": 0
+}
+(4)修改指定答案
+请求方式: PUT
+URL: /api/question/:id/answer/:answerID
+功能: 修改指定问题指定ID的答案内容。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+answerID	integer	答案ID
+请求参数:
+参数	类型	描述
+content	string	新答案内容
+请求示例:
+Json
+{
+    "content": "Life's purpose is subjective."
+}
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "Life's purpose is subjective.",
+    "question_id": 1,
+    "votes": 0}
+(5)删除指定答案
+请求方式: DELETE
+URL: /api/question/:id/answer/:answerID
+功能: 删除指定问题指定ID的答案。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+answerID	integer	答案ID
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "message": "Answer deleted successfully!"
+}
+4. 最佳答案管理
+(1)选择最佳答案
+请求方式: PUT
+URL: /api/question/:id/best-answer
+功能: 为指定问题选择最佳答案。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+请求参数:
+参数	类型	描述
+best_answer_id	integer	答案ID
+请求示例:
+Json
+{
+    "best_answer_id": 1
+}
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{"message": "Best answer selected successfully!"}
+
+(2)获取问题的最佳答案
+请求方式: GET
+URL: /api/question/:id/best-answer
+功能: 获取指定问题的最佳答案。
+路径参数:
+参数	类型	描述
+id	integer	问题ID
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+    "id": 1,
+    "content": "Life's purpose is subjective.",
+    "question_id": 1,
+    "votes": 0
+}
+5. 关键词检索
+(1)检索关键词相关的问题
+请求方式: GET
+URL: /api/search/question
+功能: 搜索包含特定关键词的问题。
+查询参数:
+参数	类型	描述
+keyword	string	搜索关键词
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+    {
+        "id": 1,
+        "content": "What is the purpose of life?",
+        "best_answer": null
+    }
+(2)检索关键词相关的答案
+请求方式: GET
+URL: /api/search/answer
+功能: 搜索包含特定关键词的答案。
+查询参数:
+参数	类型	描述
+keyword	string	搜索关键词
+响应:
+•	状态码: 200 (OK)
+•	响应数据:
+Json
+{
+        "id": 1,
+        "content": "Life's purpose is subjective.",
+        "question_id": 1,
+        "votes": 0
+}
+
+
+总结：这段代码实现了（1）用户的注册和登陆
+                    （2）问题的创建，搜索，更新，删除
+                    （3）答案的创建，搜错，更新，删除
+                    （4）最佳答案的选择和获取
+                    （5）通过关键词搜索相关的问题和答案
+                    （6）违规词过滤，在检测到违规词时自动删去该词
+                    （7）一个简单的前端欢迎页面（也许算？）
