@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杭电统一问答平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-size: 0.825em;
+            color: #eee;
+            background: url("../img/bg.png") repeat-x #222222;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+        #mainContainer {
+            background-color: #1C1C1C;
+            border: 1px solid #080808;
+            margin: 20px auto;
+            padding: 30px;
+            width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px #292929 inset;
+        }
+        h1 {
+            font-family: Century Gothic, Myriad Pro, Arial, Helvetica, sans-serif;
+            font-size: 36px;
+            padding-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #f4f4f4;
+            border-radius: 6px;
+            background: #d0ecfd;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #dcf2ff;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+<div id="mainContainer">
+    <h1>欢迎来到杭电统一问答平台</h1>
+    <button class="login-button" onclick="window.location.href = '/login'">登录</button>
+    <button class="register-button" onclick="window.location.href = '/register'">注册</button>
+</div>
+</body>
+</html>
