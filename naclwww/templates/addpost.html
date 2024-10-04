@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewPost</title>
+</head>
+<body>
+    <h2>NewPost</h2>
+    <form method="POST" action="/addpost">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br><br>
+        
+        <label for="text">Text:</label>
+        <input type="text" id="text" name="text" required><br><br>
+
+        <label for="father">Father:</label>
+        <input type="text" id="father" name="father" required><br><br>
+
+        <input type="submit" value="CreateNewPost">
+    </form>
+</body>
+</html>
