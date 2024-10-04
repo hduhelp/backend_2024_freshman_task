@@ -1,0 +1,12 @@
+<h1 style='color:orange'>Hello!Welcome to hdu!</h1>
+<h2>Do you have any questions?</h2>
+<img id='i1' src='https://p1.ssl.qhimg.com/t01892c550190fcd062.jpg'>
+<h3>作者实在太懒了  所以请自己输入路由叭！！！</h3>
+<h4>悄咪咪告诉你 点击按钮有惊喜~~</h4>
+<button id='b1'>点我</button>
+<script>
+document.getElementById('b1').onclick=function(){
+    document.getElementById('i1').src='https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/607d46d2ad735lWT.gif'
+}
+
+</script>
