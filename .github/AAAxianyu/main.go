@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,8 +25,8 @@ func initDB() (*gorm.DB, error) {
 // User 结构体
 type User struct {
 	gorm.Model
-	Username string `gorm:"uniqueIndex;not null" json:"username"`
-	Password string `gorm:"not null" json:"password"`
+	Username string `gorm:"type:varchar(255);uniqueIndex;not null" json:"username"`
+	Password string `gorm:"type:varchar(255);not null" json:"password"`
 }
 
 // Question 结构体
@@ -53,32 +52,18 @@ func migrateDB(db *gorm.DB) {
 
 // 过滤内容中的违规词
 func filterContent(content string) string {
-	// 定义需要过滤的违规词列表
 	forbiddenWords := []string{"垃圾", "最"}
-
-	// 使用正则表达式替换违规词
 	for _, word := range forbiddenWords {
 		re := regexp.MustCompile(`\b` + regexp.QuoteMeta(word) + `\b`)
 		content = re.ReplaceAllString(content, "")
 	}
-	return strings.TrimSpace(content) // 去除首尾空白
-}
-
-func sayHello(w http.ResponseWriter, r *http.Request) {
-	b, _ := ioutil.ReadFile("./hello.txt")
-	_, _ = fmt.Fprint(w, string(b))
+	return strings.TrimSpace(content)
 }
 
 func main() {
 	db, err := initDB()
 	if err != nil {
 		panic("Failed to connect database")
-	}
-	http.HandleFunc("/hello", sayHello)
-	err = http.ListenAndServe(":8080", nil)
-	if err != nil {
-		fmt.Println("http serve failed,err:%v\n", err)
-		return
 	}
 	defer func() {
 		sqlDB, err := db.DB()
@@ -323,6 +308,16 @@ func main() {
 		c.JSON(http.StatusOK, answers)
 	})
 
+	// 设置路由处理 /hello 请求
+	helloContent, err := os.ReadFile("hello.txt")
+	if err != nil {
+		log.Fatalf("Failed to read hello.txt: %v", err)
+	}
+	r.GET("/hello", func(c *gin.Context) {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", helloContent)
+	})
+
+	// 启动服务器
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
