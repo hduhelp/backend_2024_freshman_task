@@ -36,19 +36,19 @@ func Run() {
 		}
 		questionGroup := apiGroup.Group("/question")
 		{
-			questionGroup.POST("/ask", question.Ask)
+			questionGroup.POST("/", question.Ask)
 			questionGroup.POST("/changeQuestion", question.ChangeQuestion)
 			questionGroup.POST("/deleteQuestion", question.DeleteQuestion)
 		}
 		answerGroup := apiGroup.Group("/answer")
 		{
-			answerGroup.POST("/answer", answer.Answer)
+			answerGroup.POST("/", answer.Answer)
 			answerGroup.POST("/changeAnswer", answer.ChangeAnswer)
 			answerGroup.POST("/deleteAnswer", answer.DeleteAnswer)
 		}
 		adminGroup := apiGroup.Group("/admin")
 		{
-			adminGroup.GET("/admin", admin.Admin)
+			adminGroup.GET("/", admin.Admin)
 			adminGroup.POST("/checkAnswer", admin.CheckAnswer)
 			adminGroup.POST("/checkQuestion", admin.CheckQuestion)
 		}
