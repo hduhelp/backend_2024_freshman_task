@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"l1nk4i/db"
@@ -14,7 +13,7 @@ func Register(c *gin.Context) {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
-	fmt.Println(registerInfo)
+
 	if err := c.ShouldBindJSON(&registerInfo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
 		return
@@ -35,7 +34,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username exists"})
 		return
 	}
-	
+
 	user := db.User{
 		UserID:   uuid.New().String(),
 		Username: registerInfo.Username,

@@ -1,0 +1,4 @@
+CREATE DATABASE appdb;
+CREATE USER 'app'@'%' IDENTIFIED BY 'safe_password';
+GRANT ALL PRIVILEGES ON appdb.* TO 'app'@'%';
+FLUSH PRIVILEGES;
