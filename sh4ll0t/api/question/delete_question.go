@@ -3,8 +3,8 @@ package question
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 )
 
 func DeleteQuestion(c *gin.Context) {

@@ -3,8 +3,8 @@ package answer
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 	"strconv"
 )
 
@@ -15,10 +15,8 @@ func Answer(c *gin.Context) {
 		return
 	}
 	respondent := session.Get("username").(string)
-	idStr := c.PostForm("id") // 获取问题 ID
-	answerText := c.PostForm("Answer")
-
-	// 将问题 ID 从 string 转换为 uint
+	idStr := c.PostForm("id")
+	answerText := c.PostForm("answer")
 	questionID, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的问题 ID"})
@@ -26,7 +24,7 @@ func Answer(c *gin.Context) {
 	}
 
 	answer := db.Answer{
-		QuestionID: uint(questionID), // 转换为 uint
+		QuestionID: uint(questionID),
 		AnswerText: answerText,
 		Respondent: respondent,
 	}

@@ -3,9 +3,9 @@ package question
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"hduhelp_text/db"
-	"hduhelp_text/utils"
 	"net/http"
+	"sh4ll0t/db"
+	"sh4ll0t/utils"
 )
 
 func Ask(c *gin.Context) {
@@ -44,7 +44,7 @@ func Ask(c *gin.Context) {
 	}
 
 	answer := db.Answer{
-		QuestionID: newQuestion.ID, // 确保这里是 uint 类型
+		QuestionID: newQuestion.ID,
 		AnswerText: answerText,
 		Respondent: "ai",
 	}

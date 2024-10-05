@@ -8,15 +8,13 @@ import (
 )
 
 type Answer struct {
-	ID          uint     `gorm:"column:id;primaryKey;autoIncrement"`
-	AnswerText  string   `gorm:"column:answer_text"`
-	Respondent  string   `gorm:"column:respondent"`
-	LikesCount  int      `gorm:"column:likes_count"`
-	QuestionID  uint     `gorm:"column:question_id;"`
-	CheckStatus int      `gorm:"column:check"`
-	Question    Question `gorm:"foreignKey:QuestionID"`
+	ID          uint   `gorm:"column:id;primaryKey;autoIncrement"`
+	AnswerText  string `gorm:"column:answer_text"`
+	Respondent  string `gorm:"column:respondent"`
+	LikesCount  int    `gorm:"column:likes_count"`
+	QuestionID  uint   `gorm:"column:question_id"`
+	CheckStatus int    `gorm:"column:check"`
 }
-
 type User struct {
 	Username string `gorm:"column:username"`
 	Password string `gorm:"column:password"`
@@ -27,11 +25,11 @@ type Question struct {
 	TotalLikes   int      `gorm:"column:total_likes"`
 	Questioner   string   `gorm:"column:questioner"`
 	CheckStatus  int      `gorm:"column:check"`
-	Answers      []Answer `gorm:"foreignKey:QuestionID"`
+	Answers      []Answer `gorm:"foreignKey:question_id;references:id"`
 }
 
 var (
-	dbHost = "127.0.0.1"
+	dbHost = "192.168.31.27"
 	dbPort = "8888"
 	dbUser = "root"
 	dbName = "users"

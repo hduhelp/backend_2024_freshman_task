@@ -3,8 +3,9 @@ package user
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"hduhelp_text/db"
+	"gorm.io/gorm"
 	"net/http"
+	"sh4ll0t/db"
 )
 
 func Like_sort(c *gin.Context) {
@@ -15,7 +16,9 @@ func Like_sort(c *gin.Context) {
 	}
 
 	var questions []db.Question
-	if err := db.DB.Preload("Answers", "check = 1").Where("check = 1").Order("likes_count DESC").Find(&questions).Error; err != nil {
+	if err := db.DB.Preload("Answers", func(db *gorm.DB) *gorm.DB {
+		return db.Where("`check` = 1").Order("likes_count DESC")
+	}).Where("`check` = 1").Order("total_likes DESC").Find(&questions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

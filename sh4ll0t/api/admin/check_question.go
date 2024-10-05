@@ -4,8 +4,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 	"strconv"
 )
 

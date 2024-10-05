@@ -4,10 +4,10 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"hduhelp_text/api/admin"
-	"hduhelp_text/api/answer"
-	"hduhelp_text/api/question"
-	"hduhelp_text/api/user"
+	"sh4ll0t/api/admin"
+	"sh4ll0t/api/answer"
+	"sh4ll0t/api/question"
+	"sh4ll0t/api/user"
 )
 
 func Run() {
@@ -38,7 +38,7 @@ func Run() {
 		{
 			questionGroup.POST("/ask", question.Ask)
 			questionGroup.POST("/changeQuestion", question.ChangeQuestion)
-			questionGroup.POST("/deleteAnswer", question.DeleteQuestion)
+			questionGroup.POST("/deleteQuestion", question.DeleteQuestion)
 		}
 		answerGroup := apiGroup.Group("/answer")
 		{

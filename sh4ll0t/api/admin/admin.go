@@ -3,9 +3,8 @@ package admin
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"hduhelp_text/api/user"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 )
 
 func Admin(c *gin.Context) {
@@ -18,7 +17,7 @@ func Admin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "管理员才可以访问！"})
 		return
 	}
-	var questions []user.Question
+	var questions []db.Question
 	if err := db.DB.Preload("Answers").Find(&questions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

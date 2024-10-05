@@ -3,9 +3,8 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 )
 
 func Register(c *gin.Context) {
@@ -19,13 +18,12 @@ func Register(c *gin.Context) {
 		return
 	}
 	user.Password = string(hashedPassword)
-
+	if db.DB.Where("username = ?", user.Username).First(&db.User{}).Error == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "用户名已存在"})
+		return
+	}
 	result := db.DB.Create(&user)
 	if result.Error != nil {
-		if result.Error == gorm.ErrDuplicatedKey {
-			c.JSON(http.StatusConflict, gin.H{"error": "用户名已存在"})
-			return
-		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "注册失败"})
 		return
 	}

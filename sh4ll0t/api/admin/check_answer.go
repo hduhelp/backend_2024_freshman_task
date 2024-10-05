@@ -4,8 +4,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 	"strconv"
 )
 
@@ -37,9 +37,7 @@ func CheckAnswer(c *gin.Context) {
 		}
 		return
 	}
-
-	// 更新审核状态
-	answer.CheckStatus = checkStatus // 假设你在 Answer 结构体中添加了 CheckStatus 字段
+	answer.CheckStatus = checkStatus
 	if err := db.DB.Save(&answer).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

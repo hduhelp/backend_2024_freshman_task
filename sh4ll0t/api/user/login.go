@@ -4,8 +4,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"hduhelp_text/db"
 	"net/http"
+	"sh4ll0t/db"
 )
 
 func Login(c *gin.Context) {
