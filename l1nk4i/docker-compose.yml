@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+    volumes:
+      - /home/l1nk/mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    expose:
+      - "3306"
+      - "33060"
+    ports:
+      - "3306:3306" # debug
+
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
