@@ -7,22 +7,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
 
 const (
 	xunfeiAIAPIUrl = "wss://spark-api.xf-yun.com/v3.5/chat"
-	apiSecret      = "OTM2NGMxOWJjY2FkOGYwZTEyOTVjZGY2"
-	apiKey         = "ad54d6374685da80a5f420297ab6af00"
-	appId          = "cee63188"
 )
 
 // GenerateSum 通过WebSocket与AI模型交互以生成答案
 func GenerateSum(question string, answers []string) (string, error) {
+	err := godotenv.Load("D:/ermian/Akuma/secret.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	apiKey := os.Getenv("API_KEY")
+	apiSecret := os.Getenv("API_SECRET")
+	appId := os.Getenv("APP_ID")
+
 	d := websocket.Dialer{
 		HandshakeTimeout: 5 * time.Second,
 	}

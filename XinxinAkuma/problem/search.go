@@ -31,7 +31,7 @@ func SearchProblem(c *gin.Context) {
 		return
 	}
 
-	result := database2.DB.Where("question = ?", search.Search).First(&question)
+	result := database2.DB.Where("question LIKE ?", "%"+search.Search+"%").First(&question)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

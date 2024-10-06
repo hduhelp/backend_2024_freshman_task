@@ -1,48 +1,40 @@
 package problem
 
 import (
-	"Akuma/database1"
 	"Akuma/database2"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
+
 	"time"
 )
 
+type updateProblem struct {
+	QuestionId int    `json:"question_id" binding:"required"`
+	Question   string `json:"question" binding:"required"`
+}
+
 // Update 更新问题
 func Update(c *gin.Context) {
-	var updatedProblem Problem
-	idParam := c.Param("id")
 
-	// 将 id 从字符串转换为整数类型
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "无效的 ID。",
-		})
-		return
-	}
+	var updatedProblem updateProblem
 
-	// 验证输入
 	if err := c.ShouldBindJSON(&updatedProblem); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "输入错误。",
 		})
 		return
 	}
-
-	var user User
-
-	if err := database1.DB.Where("id=?", updatedProblem.UserID).First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "用户不存在。",
+	userid, exist := c.Get("user_id")
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "无法获取用户身份",
 		})
 		return
 	}
 
 	// 检查是否存在该问题
 	var existingProblem Problem
-	if err := database2.DB.First(&existingProblem, id).Error; err != nil {
+	if err := database2.DB.First(&existingProblem, updatedProblem.QuestionId).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "问题未找到。",
 		})
@@ -51,11 +43,18 @@ func Update(c *gin.Context) {
 
 	// 检查是否存在与更新的问题内容相同的其他问题
 	var duplicateProblem Problem
-	result := database2.DB.Where("question = ? AND id != ?", updatedProblem.Question, id).First(&duplicateProblem)
+	result := database2.DB.Where("question = ? AND id != ?", updatedProblem.Question, updatedProblem.QuestionId).First(&duplicateProblem)
 	if result.Error == nil {
 		// 如果找到与更新内容相同但 ID 不同的问题，返回错误
 		c.JSON(http.StatusConflict, gin.H{
 			"error": "相同问题已存在。",
+		})
+		return
+	}
+
+	if userid != existingProblem.UserID {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "你没有权限更新其他人问题。",
 		})
 		return
 	}

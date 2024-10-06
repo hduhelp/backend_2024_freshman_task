@@ -2,7 +2,6 @@ package problem
 
 import (
 	"Akuma/AI"
-	"Akuma/database1"
 	"Akuma/database2"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -35,16 +34,15 @@ func Submit(c *gin.Context) {
 		})
 		return
 	}
-	userID := c.Param("user_id")
-
-	var UserID User
-	if err := database1.DB.Where("id=?", userID).First(&UserID).Error; err != nil {
+	userid, exist := c.Get("user_id")
+	if !exist {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "用户不存在。",
+			"error": "无法获取用户身份",
 		})
 		return
 	}
-	submit.UserID = UserID.ID
+
+	submit.UserID = userid.(uint)
 
 	var problem Problem
 	if err := database2.DB.First(&problem, submit.QuestionId).Error; err != nil {
@@ -92,18 +90,25 @@ func Submit(c *gin.Context) {
 }
 
 func GetSubmission(c *gin.Context) {
-	questionID := c.Param("id")
-	userID := c.Param("user_id")
-	var UserID User
-	if err := database1.DB.Where("id=?", userID).First(&UserID).Error; err != nil {
+	var questionId questionId
+
+	if err := c.ShouldBindJSON(&questionId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "用户不存在。",
+			"error": "输入无效，请检查您的数据。",
+		})
+		return
+	}
+
+	_, exist := c.Get("user_id")
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "无法获取用户身份",
 		})
 		return
 	}
 
 	var sub []Submission
-	database2.DB.Where("question_id = ?", questionID).Find(&sub)
+	database2.DB.Where("question_id = ?", questionId.QuestionId).Find(&sub)
 
 	c.JSON(http.StatusOK, gin.H{
 		"submission": sub,
@@ -111,10 +116,18 @@ func GetSubmission(c *gin.Context) {
 }
 
 func GenerateAnswer(c *gin.Context) {
-	questionID := c.Param("id")
+	var questionId questionId
+
+	if err := c.ShouldBindJSON(&questionId); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "输入无效，请检查您的数据。",
+		})
+		return
+	}
+
 	var question Problem
 
-	if err := database2.DB.Where("id=?", questionID).First(&question).Error; err != nil {
+	if err := database2.DB.Where("id=?", questionId.QuestionId).First(&question).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "不存在此问题。",
@@ -129,7 +142,7 @@ func GenerateAnswer(c *gin.Context) {
 
 	//获取所有提交的答案
 	var submissions []Submission
-	if err := database2.DB.Where("question_id = ?", questionID).Find(&submissions).Error; err != nil {
+	if err := database2.DB.Where("question_id = ?", questionId.QuestionId).Find(&submissions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "无法获取提交的回答。",
 		})
