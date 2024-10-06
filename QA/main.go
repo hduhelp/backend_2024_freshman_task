@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -11,6 +13,7 @@ import (
 	"gorm.io/gorm/logger"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type User struct {
@@ -78,6 +81,68 @@ func yes(c *gin.Context, u User) bool {
 	}
 
 	return true
+}
+
+// 生成jwt
+func generateJWT(u User) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := jwt.MapClaims{
+		"id":   u.ID,
+		"name": u.Name,
+	}
+	token.Claims = claims
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
+
+// 验证jwt
+func authenticateToken(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtKey, nil
+	})
+	if err != nil || !token.Valid {
+		return token, fmt.Errorf("invalid token")
+	}
+	return token, nil
+}
+
+// JWT中间件
+func JWTMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.Abort()
+			return
+		}
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		token, err := authenticateToken(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claims"})
+			c.Abort()
+			return
+		}
+		userID, ok := claims["id"].(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+			c.Abort()
+			return
+		}
+		c.Set("userID", userID)
+		c.Next()
+	}
 }
 
 // 问答网站各个函数
@@ -150,6 +215,7 @@ func searchQuestions(c *gin.Context) {
 var db1 *gorm.DB
 var db2 *gorm.DB
 var err error
+var jwtKey = []byte("your_secret_key")
 
 func main() {
 	dsn1 := "root:123456@tcp(127.0.0.1:3306)/mydatabase?charset=utf8mb4&parseTime=True&loc=Local"
@@ -198,8 +264,16 @@ func main() {
 		var existingUser User
 		res := db1.Where("id = ?", u.ID).First(&existingUser)
 		if res.RowsAffected != 0 && HashPassword(u.Password, existingUser.Salt) == existingUser.Password {
+			token, err := generateJWT(existingUser)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Error generating JWT",
+				})
+				return
+			}
 			c.JSON(http.StatusOK, gin.H{
 				"message": "登录成功！",
+				"token":   token,
 			})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{
