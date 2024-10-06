@@ -1,0 +1,11 @@
+
+.main_function{
+    text-align: center;
+    margin-top: 300px;
+}
+
+.regis,
+.login{
+    width: 400px;
+    height: 200px;
+}

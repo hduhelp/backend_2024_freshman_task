@@ -1,0 +1,26 @@
+.main_function{
+    font-size: 80px;
+    margin-top: 200px;
+}
+
+.name,
+.psw{
+    height: 80px;
+    vertical-align: middle;
+    font-size: 50px;
+}
+
+form{
+    /*margin: 0 auto;*/
+    text-align: center;
+}
+
+.btn{
+    width: 80px;
+    height: 80px;
+}
+
+.alert{
+    font-size: 100px;
+}
+

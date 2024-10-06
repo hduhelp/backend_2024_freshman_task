@@ -1,0 +1,261 @@
+{{define "main"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主界面</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/c/main_style.css">
+
+</head>
+<body>
+
+        <div class="head_section">
+            <button class="self_info">个人信息</button>
+            <input type="text" class="search_question" placeholder="请输入你的问题相关词">
+            <button class="search_btn">搜索</button>
+            <button class="PostQuestion">发表问题</button>
+        </div>
+
+
+
+        <div class="post">
+
+            <div class="post1" ></div>
+            <div class="post2" ></div>
+            <div class="post3" ></div>
+            <div class="post4" ></div>
+            <div class="post5" ></div>
+            <div class="middle"></div>
+            <div class="post6" ></div>
+            <div class="post7" ></div>
+            <div class="post8" ></div>
+            <div class="post9" ></div>
+            <div class="post10" ></div>
+
+        </div>
+        
+        <div class="page_index_section">
+            <a class="page_index" id='1'>1</a>
+            <a class="page_index" id='2'>2</a>
+            <a class="page_index" id='3'>3</a>
+            <a class="page_index" id='4'>4</a>
+            <a class="page_index" id='5'>5</a>
+            <a class="page_index" id='6'>6</a>
+            <a class="page_index" id='7'>7</a>
+            <a class="page_index" id='8'>8</a>
+            <a class="page_index" id='9'>9</a>
+            <a class="page_index" id='10'>10</a>
+        </div>
+
+
+        <script>
+
+
+            var SinglePageSize=10
+            var CurrentPage='1'
+
+
+            //根据页码加载数据
+            function LoadMainContent(SearchKeyWords='没有搜索词'){
+
+                // console.log("接受到的:",SearchKeyWords)
+
+                axios({
+                    url:`/auth/get_posts/page${CurrentPage}`,
+                    method:'POST',
+                    headers:{
+                        "Authorization": localStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    },
+                    data:JSON.stringify({
+                        SKW:SearchKeyWords
+                    })
+                }).then(result=>{
+                    console.log(result.data)
+
+                    var ResponseData=result.data
+                    if(ResponseData.hasOwnProperty("posts")){
+                        var posts=ResponseData.posts
+
+                        // console.log("posts的大小为",posts.length)
+
+                        //采用这种方式是因为我需要用空字符串去更新没有数据的div
+
+                        var Middle=document.querySelector(".middle")
+
+                        for(var i=1;i<=SinglePageSize;i++){
+
+                            var Headline=''
+
+                            if(i<=posts.length){
+                                var post=posts[i-1]
+                                Headline=post.Headline
+                                console.log("headline为",Headline)
+                            }
+
+                            //设置没有帖子的提示
+                            if(posts.length==0){
+                                Middle.innerHTML="此页为空"
+                                Middle.classList.add("middle")
+                            }else{
+                                Middle.innerHTML=''
+                            }
+
+                            // console.log(`${i}  帖子id：${post.ID},标题：${post.Headline},正文：${post.Content}`)
+                            var Postclass="post"+i.toString()
+                            // var Div=document.querySelector(`#${index.toString()}`)
+                            var Div=document.querySelector(`.${Postclass}`)
+                            Div.innerHTML=`${Headline}`
+
+
+                            //div中没有内容将不添加任何东西
+
+                            if(Div.textContent.trim()!==''){
+                                // console.log(Postclass,"添加了has_content")
+                                const CurrentI=i
+                                Div.addEventListener("click",()=>{
+                                    IntoPost(CurrentI)
+                                })
+                                Div.classList.add("has_content")
+                            }else{
+                                // console.log("没有添加has_content")
+                                Div.classList.remove("has_content")
+                            }
+
+                        }
+
+                    }
+                }).catch(error=>{
+                    console.log(error.response.data.error)
+                    alert("加载错误")
+                })
+            }
+
+
+            //添加页码点击事件
+            document.addEventListener("DOMContentLoaded",()=>{
+
+                var SearchKeyWords='没有搜索词'
+
+                var pages=document.querySelectorAll(".page_index")
+                pages.forEach(function (link){
+                    //对每个页码添加点击事件
+                    link.addEventListener("click",(event)=>{
+                        console.log("点击的是",event.target.id)
+                        CurrentPage=event.target.id
+                        LoadMainContent(SearchKeyWords)
+                    })
+                })
+
+                LoadMainContent()
+
+                //搜索相关问题
+                document.querySelector(".search_btn").addEventListener("click",()=>{
+
+                    var SearchValue=document.querySelector(".search_question").value
+                    SearchKeyWords=SearchValue.trim()
+
+                    console.log("搜索内容为",SearchKeyWords)
+
+                    // if(SearchKeyWords==''){
+                    //     alert("输入内容为空")
+                    //     return
+                    // }else{
+                    //     CurrentPage='1'
+                    //     LoadMainContent(SearchKeyWords)
+                    // }
+                    CurrentPage='1'
+                    LoadMainContent(SearchKeyWords)
+                })
+
+            })
+
+
+
+
+            function IntoPost(index){
+
+            //axios两种方式
+                // axios({
+                //     url: `/auth/post/${index}`,
+                //     method: 'GET',
+                //     headers: {
+                //         "Authorization": localStorage.getItem('token')
+                //     }
+                // }).then(result=>{
+                //     console.log(result.data)
+                //     // window.location.href=`/post/${index}`
+                // }).catch(error=>{
+                //     console.log(error.data)
+                //     alert("请重新登录！")
+                //     window.location.href='/menu'
+                // })
+
+                console.log("当前页码是：",CurrentPage,"index:",index)
+                axios.get(`/auth/post/${index+SinglePageSize*(CurrentPage-1)}`,{
+                    headers: {
+                        "Authorization": localStorage.getItem('token')
+                    }
+                }).then(result=>{
+                    console.log(result.data)
+                    window.location.href=`/post/${result.data.PostId}`
+                }).catch(error=>{
+                    console.log(error.data)
+                    alert("请重新登录！")
+                    window.location.href='/menu'
+                })
+            }
+
+
+
+
+
+            //进入个人信息
+            document.querySelector(".self_info").addEventListener("click",async ()=>{
+                try {
+                    const response = await axios.get("/auth/self_info", {
+                        headers: {
+                            "Authorization": localStorage.getItem('token')
+                        }
+                    })
+
+                    if (response.status == 200) {
+                        window.location.href = '/self_info_page'
+                    } else {
+                        window.location.href = '/menu'
+                        alert("请重新登录！")
+                    }
+                }catch (error){
+                    alert("请重新登录！")
+                    window.location.href='/menu'
+                }
+
+            })
+
+            //进入贴子发布
+            document.querySelector(".PostQuestion").addEventListener("click",async ()=>{
+                try {
+                    const response = await axios.get("/auth/post_question", {
+                        headers: {
+                            "Authorization": localStorage.getItem('token')
+                        }
+                    })
+
+                    if (response.status == 200) {
+                        window.location.href = '/post_question_page'
+                    } else {
+                        alert("请重新登录！1")
+                        window.location.href = '/menu'
+
+                    }
+                }catch (error){
+                    console.log(error)
+                    alert("请重新登录！2")
+                    window.location.href='/menu'
+                }
+            })
+        </script>
+</body>
+</html>
+{{end}}

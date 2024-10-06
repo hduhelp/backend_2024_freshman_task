@@ -1,0 +1,33 @@
+{{define "menu"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主界面</title>
+    <link rel="stylesheet" href="/c/menu_style.css">
+</head>
+<body>
+
+        <div class="main_function">
+            <button class="regis">注册</button>
+            <button class="login">登录</button>
+        </div>
+
+
+
+        <script>
+            document.querySelector(".regis").addEventListener("click",
+                ()=>{
+                    window.location.href = "/regis_page"
+                }
+            )
+            document.querySelector(".login").addEventListener("click",
+                ()=>{
+                    window.location.href = "/login_page"
+                }
+            )
+
+        </script>
+</body>
+</html>
+{{end}}

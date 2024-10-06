@@ -1,0 +1,35 @@
+.post_headline{
+    font-size: 100px;
+}
+
+.post_user_name,
+.post_date{
+    position: absolute;
+    right: 0px;
+}
+
+.comment_section_name{
+    font-size: 80px;
+}
+
+.comment_section{
+    width: 1000px;
+    height: 800px;
+    border: 2px;
+    border-style: solid;
+    margin: 0 auto;
+}
+
+.comment_section_name,
+.post_comment_section{
+    margin:0 auto;
+    text-align: center;
+}
+
+.back_main_btn{
+    float: right;
+    width: 100px;
+    height: 50px;
+    margin: 50px;
+}
+
