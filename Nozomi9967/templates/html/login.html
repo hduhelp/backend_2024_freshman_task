@@ -1,0 +1,88 @@
+{{define "login"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页面</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/c/login_regis_style.css">
+</head>
+<body>
+<form>
+
+    <div class="main_function">
+
+        <div class="zhanghao">
+            <span>账号</span><input type="text" class="name">
+        </div>
+
+        <br>
+
+        <div class="mima"><span>密码</span><input type="password" class="psw"></div>
+
+        <button class="btn" type="button">提交</button>
+    </div>
+
+    <span class="alert"></span>
+
+
+
+    <script>
+        const myalert = document.querySelector(".alert")
+
+        document.querySelector(".btn").addEventListener('click',HandleLogin)
+        document.addEventListener("keydown",(event)=>{
+            if(event.key=="Enter"){
+                HandleLogin()
+            }
+        })
+
+        function HandleLogin(){
+            const uname=document.querySelector(".name").value
+            const upsw=document.querySelector(".psw").value
+            console.log(uname,upsw)
+
+            if(uname.length<8||upsw.length<8){
+                myalert.innerHTML = ''
+                myalert.innerHTML = `<span>用户名和密码必须大于8位</span>`
+                return
+            }
+
+            axios({
+                url:'/login',
+                method:'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data:JSON.stringify({
+                    Name:uname,
+                    Psw:upsw
+                })
+            }).then(result => {
+                myalert.innerHTML = ''
+                if (result.data && result.data.msg && result.data.token) {
+                    localStorage.setItem('token', result.data.token)
+                    localStorage.setItem("userid",result.data.userid)
+
+                    myalert.innerHTML = `<span>${result.data.msg}</span>`
+
+
+                    axios.defaults.headers.common['Authorization'] = ` ${result.data.token}`;
+                    setTimeout(function (){window.location.href='/main'},1000)
+
+                }
+            }).catch(Error=>{
+                myalert.innerHTML = ' '
+                if(Error.response.data&&Error.response.data.error){
+                    myalert.innerHTML = `<span>错误：${Error.response.data.error}</span>`
+                }else{
+                    myalert.innerHTML = `<span>&{未知错误}</span>`
+                }
+            })
+
+        }
+    </script>
+</form>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,309 @@
+{{define "Post_page"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>帖子</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/c/post_page_style.css">
+</head>
+<body>
+
+<!--    Post-->
+    <div class="post_headline"></div>
+    <br>
+    <div class="post_user_name"></div>
+    <br>
+    <div class="post_date"></div>
+    <br>
+    <div class="post_content"></div>
+
+    <div class="bottle_section" >
+
+<!--    Comment-->
+        <div class="comment_section">
+
+            <div class="comment_section_name">评论区</div>
+
+<!--            发表评论事件-->
+            <div class="post_comment_section">
+                <input type="text" class="post_comment" placeholder="发表评论">
+                <button class="comment_post_btn">评论</button>
+            </div>
+
+
+<!--            评论内容区-->
+            <div class="comments_content_section" >
+                <ul class="comments-insert">
+
+                </ul>
+            </div>
+
+
+
+        </div>
+
+
+
+
+<!--            删除文章事件-->
+        <div class="delete_post">
+            <button class="delete_btn">删除该帖子</button>
+        </div>
+
+<!--        修改帖子事件-->
+        <div class="modif_post">
+            <button class="modif_btn">修改内容</button>
+        </div>
+
+        <button class="back_main_btn">返回主界面</button>
+
+    </div>
+
+
+    <script>
+
+
+        var Postid='{{.PostId}}'
+        console.log(Postid)
+        // console.log(typeof Postid)
+        var PostIdUint=parseInt(Postid,10)
+        console.log("PostIdUint为",PostIdUint)
+        console.log("PostIdUint类型为",typeof PostIdUint)
+
+        //返回主界面事件
+        const Back_main=document.querySelector(".back_main_btn")
+        Back_main.addEventListener("click",()=>{
+            window.location.href='/main'
+        })
+
+
+        //加载帖子和评论
+        document.addEventListener("DOMContentLoaded",()=>{
+
+            var PlaceHolder=document.querySelector(".post_comment")
+            // PlaceHolder.placeholder="发表评论"
+
+
+            axios({
+                url:'/auth/get_idpost_info',
+                method:'POST',
+                headers:{
+
+                    "Authorization":localStorage.getItem("token"),
+
+                    //传过去的json数据一直有问题，原来是这个没加
+                    //好吧还是没解决，后端直接用请求体里的数据了
+
+                    //解决了，json的键和你后端用结构体接收的键必须一模一样
+                    //而且键不能用引号包起来
+                    'Content-Type': 'application/json'
+                },
+                data:{
+                    ID:PostIdUint
+                }
+            }).then(result=>{
+                //获取填充数据
+                var post=result.data.post
+                var post_user=result.data.post_user
+                var timestring=result.data.post.FormattedTime
+                var TopComments=result.data.comments
+
+
+                console.log("帖子id为",post.ID)
+                console.log(TopComments)
+
+                //获取被填充的元素
+                var Headline=document.querySelector(".post_headline")
+                var Content=document.querySelector(".post_content")
+                var Username=document.querySelector(".post_user_name")
+                var PostTime=document.querySelector(".post_date")
+                var html=''
+
+                if(TopComments){
+                    for(var topcomment of TopComments){
+                        html+=`<li class="topcomments-item" id="${topcomment.id}" data-username="${topcomment.username}">
+                    <strong>${topcomment.username}:${topcomment.content}</strong>
+                    <ul>
+                    `
+                        for(var reply of topcomment.replies){
+                            html+=`<li class="reply-item">
+                        ${reply.username}:${reply.content}
+                        </li>
+                        `
+                        }
+                        html+=`</ul></li>`
+                    }
+                }
+
+                var comments=document.querySelector(".comments-insert")
+
+                Headline.innerHTML=`${post.Headline}`
+                Content.innerHTML=`${post.Content}`
+                Username.innerHTML=`作者：${post_user.Name}`
+                PostTime.innerHTML=`发布日期：${timestring}`
+                comments.innerHTML=html
+
+            var  CommentId="0"//据此判断回复的是主贴还是主贴下的评论
+
+            //点击评论回复事件
+                //设置 点击评论改变placeholder 事件
+                document.querySelectorAll(".topcomments-item").forEach(item=>{
+                    item.addEventListener("click",function (event){
+
+                        event.stopPropagation()//阻止事件冒泡，不然会一直显示"发布评论"
+
+                        CommentId=this.getAttribute("id")
+                        var CommentUsername=this.getAttribute("data-username")
+                        // console.log(CommentId)
+                        // console.log(CommentUsername)
+
+                        PlaceHolder.placeholder="回复"+CommentUsername
+                    })
+                })
+
+                document.querySelector("body").addEventListener("click",(event)=>{
+                    if(!event.target.closest('.back_main_btn')&&
+                        !event.target.closest('.post_comment_section')){
+                        PlaceHolder.placeholder="发布评论"
+                    }
+                })
+
+                //根据回复对象提交信息到后端
+                document.querySelector(".comment_post_btn").addEventListener("click",()=>{
+
+                    var CommentContent=document.querySelector(".post_comment").value
+                    var CommentIdInt=parseInt(CommentId,10)
+                    var CommentIdUint=CommentIdInt>>>0
+
+                    axios({
+                        url:'/auth/upload_summit_comment',
+                        method: "POST",
+                        headers:{
+                            "Authorization":localStorage.getItem("token"),
+                            'Content-Type': 'application/json'
+                        },
+                        data:JSON.stringify({
+                            Content:CommentContent,
+                            PostId:PostIdUint,
+                            ParentId:CommentIdUint
+                        })
+                    }).then(result=>{
+                        console.log(result.data)
+                        window.location.href=`/post/${PostIdUint}`
+                    }).catch(error=>{
+                        console.log(error.data)
+                    })
+                })
+
+                function HandleDelete(){
+                    document.querySelector(".delete_btn").addEventListener("click",()=>{
+                        axios({
+                            url:'/auth/delete_post',
+                            method:'POST',
+                            headers:{
+                                "Authorization":localStorage.getItem("token"),
+                                'Content-Type': 'application/json'
+                            },
+                            data:JSON.stringify({
+                                PostID:PostIdUint //不是POST穿过去的数据会错误
+                            })
+                        }).then(result=>{
+                            alert(result.data.msg)
+                            setTimeout(function (){
+                                window.location.href='/main'
+                            },1000)
+                        }).catch(error=>{
+                            alert(error.response.data.error)
+                        })
+                    })
+
+                }
+
+                function HandleModif(){
+                    document.querySelector(".modif_btn").addEventListener("click",()=>{
+                        //先跳转到修改页面
+                        window.location.href=`/modif/${PostIdUint}`
+                    })
+
+                }
+
+                //删除帖子事件判断
+                var userid=localStorage.getItem("userid")
+                console.log("当前用户id为",userid)
+                if(post_user.ID!=userid){
+                    console.log("not the host")
+                    var parent=document.querySelector(".bottle_section")
+                    var child1=document.querySelector(".delete_post")
+                    var child2=document.querySelector(".modif_post")
+                    // console.log('parent:',parent)
+                    // console.log('child:',child1)
+                    // console.log('child:',child2)
+
+                    parent.removeChild(child1)
+                    parent.removeChild(child2)
+
+                }else{
+                    //用户有权限删除
+                    console.log("is the host")
+                    HandleDelete()
+                    HandleModif()
+
+                }
+
+
+
+
+
+
+
+
+            }).catch(error=>{
+                console.log("报错信息为",error.response.data.error)
+
+                if(error.response.data.error=="未提供token"||error.response.data.error=="无效的token"){
+                    alert("请重新登录")
+                    window.location.href="/login_page"
+                }else{
+                    alert("文章加载失败")
+                    window.location.href='/main'
+                }
+
+            })
+        })
+
+
+
+
+        //发布评论事件
+        // document.querySelector(".comment_post_btn").addEventListener("click",()=>{
+        //
+        //     var Comment_content=document.querySelector(".post_comment").value
+        //
+        //
+        //     console.log("Comment_content的值为")
+        //     console.log(Comment_content)
+        //
+        //     axios({
+        //         url:'/auth/upload_summit_comment',
+        //         method: "POST",
+        //         headers:{
+        //             "Authorization":localStorage.getItem("token"),
+        //             'Content-Type': 'application/json'
+        //         },
+        //         data:JSON.stringify({
+        //             Content:Comment_content,
+        //             PostId:PostIdUint
+        //         })
+        //     }).then(result=>{
+        //         console.log(result.data)
+        //         window.location.href=`/post/${PostIdUint}`
+        //     }).catch(error=>{
+        //         console.log(error.data)
+        //     })
+        // })
+
+    </script>
+</body>
+</html>
+{{end}}

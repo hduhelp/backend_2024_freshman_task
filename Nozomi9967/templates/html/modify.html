@@ -1,0 +1,111 @@
+{{define "Modif_page"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改页面</title>
+    <link rel="stylesheet" href="/c/post_question_style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+    <div class="main_function">
+        <div>
+            <input type="text" class="headline" placeholder="请输入标题">
+        </div>
+
+        <div>
+            <textarea rows="10" cols="40" class="content"></textarea>
+        </div>
+        <div>
+            <button class="btn">修改</button>
+        </div>
+    </div>
+
+    <script>
+
+        //postid的string转int
+        var PostId=`{{.PostId}}`
+        var PostIdInt=parseInt(PostId,10)
+
+    //填充原帖子内容
+
+        var Headline=document.querySelector(".headline")
+        var Content=document.querySelector(".content")
+
+        document.addEventListener("DOMContentLoaded",()=>{
+            axios({
+                url:`/auth/get_pre_modif_Info/${PostIdInt}`,
+                method:"GET",
+                headers:{
+                    "Authorization":localStorage.getItem("token"),
+                }
+            }).then(result=>{
+                console.log(result.data.PostHeadline)
+                console.log(result.data.PostContent)
+                Headline.value= `${result.data.PostHeadline}`
+                Content.innerHTML=`${result.data.PostContent}`
+            }).catch(error=>{
+                console.log(error.response.data.error)
+                if(error.status==400){
+                    alert("未登录")
+                    // window.location.href='/login_page'
+                }
+                if(error.status==401){
+                    alert("登陆过期")
+                    // window.location.href='/login_page'
+                }
+            })
+        })
+
+    //提交修改内容
+        document.querySelector(".btn").addEventListener("click",()=>{
+            var pheadline=document.querySelector(".headline").value
+            var pcontent=document.querySelector(".content").value
+            // console.log(pcontent,pheadline)
+
+            if (pheadline.length<2){
+                alert("标题字数不能小于2")
+                return
+            }
+            if (pcontent.length<5){
+                alert("正文字数不能小于5")
+                return
+            }
+
+            axios({
+                url:`/auth/modif_post_info/${PostIdInt}`,
+                method:'POST',
+                headers:{
+                    "Authorization":localStorage.getItem("token"),
+                    'Content-Type': 'application/json'
+                },
+                data:JSON.stringify({
+                    Headline: pheadline,
+                    Content: pcontent
+                })
+            }).then(result=>{
+                if(result.status==200){
+                    alert("帖子修改成功")
+                    window.location.href='/main'
+                }
+
+            }).catch(error=>{
+                if(error.status==400){
+                    alert("未登录")
+                    window.location.href='/login_page'
+                }
+                if(error.status==401){
+                    alert("登陆过期")
+                    window.location.href='/login_page'
+                }
+
+            })
+        })
+
+
+    </script>
+
+</body>
+</html>
+{{end}}
