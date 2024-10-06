@@ -31,18 +31,21 @@ func Run() {
 			userGroup.POST("/login", user.Login)
 			userGroup.POST("/logout", user.Logout)
 			userGroup.POST("/like", user.Like)
-			userGroup.GET("like_sort", user.Like_sort)
+			userGroup.GET("/like_sort", user.Like_sort)
 			userGroup.GET("/show", user.ShowQuestionAndAnswer)
+			userGroup.POST("/searchUser", user.SearchUser)
 		}
 		questionGroup := apiGroup.Group("/question")
 		{
 			questionGroup.POST("/", question.Ask)
 			questionGroup.POST("/changeQuestion", question.ChangeQuestion)
 			questionGroup.POST("/deleteQuestion", question.DeleteQuestion)
+			questionGroup.POST("/searchQuestion", question.SearchQuestion)
 		}
 		answerGroup := apiGroup.Group("/answer")
 		{
 			answerGroup.POST("/", answer.Answer)
+			answerGroup.POST("/searchAnswer", answer.SearchAnswer)
 			answerGroup.POST("/changeAnswer", answer.ChangeAnswer)
 			answerGroup.POST("/deleteAnswer", answer.DeleteAnswer)
 		}

@@ -29,7 +29,7 @@ type Question struct {
 }
 
 var (
-	dbHost = "192.168.31.27"
+	dbHost = "127.0.0.1"
 	dbPort = "8888"
 	dbUser = "root"
 	dbName = "users"
@@ -38,8 +38,8 @@ var (
 )
 
 const (
-	maxOpenConns = 100
-	maxIdleConns = 20
+	maxOpenConns = 10
+	maxIdleConns = 5
 )
 
 func init() {
