@@ -13,10 +13,19 @@ type Problem struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Question  string    `json:"question" binding:"required"`
 	CreatedAt time.Time `json:"created_at"`
-	UserID    uint      `json:"user_id" binding:"required"`
+	UserID    uint      `json:"user_id"`
 }
 
 func Create(c *gin.Context) {
+
+	userid, exist := c.Get("user_id")
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "无法获取用户身份",
+		})
+		return
+	}
+
 	var create Problem
 	if err := c.ShouldBindJSON(&create); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -42,16 +51,14 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	userID, exists := c.Get("user_id")
-
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "无法获取用户身份",
+	userIDUint, ok := userid.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "用户ID类型错误。",
 		})
 		return
 	}
-
-	create.UserID = userID.(uint)
+	create.UserID = userIDUint
 	create.CreatedAt = time.Now()
 
 	if err := database2.DB.Create(&create).Error; err != nil {

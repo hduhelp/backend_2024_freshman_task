@@ -1,7 +1,7 @@
 package register
 
 import (
-	"Akuma/database1"
+	"Akuma/database2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt" // 用于密码哈希
 	"net/http"
@@ -27,7 +27,7 @@ func Register(c *gin.Context) {
 	}
 
 	var existingUser User
-	result := database1.DB.Where("name = ?", register.Name).First(&existingUser)
+	result := database2.DB.Where("name = ?", register.Name).First(&existingUser)
 
 	if result.Error == nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -66,7 +66,7 @@ func Register(c *gin.Context) {
 
 	register.Password = string(hashedPassword) // 替换为哈希后的密码
 
-	if err := database1.DB.Create(&register).Error; err != nil {
+	if err := database2.DB.Create(&register).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "无法保存用户信息",
 		})

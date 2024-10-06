@@ -6,6 +6,8 @@ import (
 	"Akuma/problem"
 	"Akuma/register"
 	"Akuma/router"
+	"log"
+	"os"
 )
 
 func main() {
@@ -15,8 +17,13 @@ func main() {
 	database2.AutoMigrate(&problem.Problem{}, &problem.Submission{})
 
 	r := router.InitRouter()
-	err := r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Starting server on port %s", port)
+	err := r.Run(":" + port)
 	if err != nil {
-		return
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }

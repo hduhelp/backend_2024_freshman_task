@@ -1,16 +1,29 @@
 package database2
 
 import (
+	"fmt"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"os"
 )
 
 var DB *gorm.DB
 
 // InitDB 初始化数据库连接
 func InitDB() {
-	dsn := "root:Wu12345678@tcp(127.0.0.1:3306)/problem_db?charset=utf8mb4&parseTime=True&loc=Local"
+	er := godotenv.Load("D:/ermian/Akuma/secret.env")
+	if er != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_2"))
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

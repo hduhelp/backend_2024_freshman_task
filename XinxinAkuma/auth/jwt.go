@@ -5,12 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
 
-// 秘钥 (确保在生产环境中安全存储此秘钥)
-var jwtSecret = []byte("yourSecretKey")
+// 秘钥
+var jwtSecret = []byte(os.Getenv("JWT_KEY"))
 
 // 定义 JWT 的声明结构
 type Claims struct {
