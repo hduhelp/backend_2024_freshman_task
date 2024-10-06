@@ -2,7 +2,7 @@ package login
 
 import (
 	"Akuma/auth"
-	"Akuma/database2"
+	"Akuma/database1"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -35,7 +35,7 @@ func Login(c *gin.Context) {
 
 	var user User
 	// 查找用户
-	if err := database2.DB.Where("name = ?", input.Name).First(&user).Error; err != nil {
+	if err := database1.DB.Where("name = ?", input.Name).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名或密码错误"})
 		return
 	}

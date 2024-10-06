@@ -1,6 +1,7 @@
 package problem
 
 import (
+	"Akuma/database1"
 	"Akuma/database2"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,7 @@ func DeleteProblem(c *gin.Context) {
 	}
 
 	var user User
-	database2.DB.Where("name=?", username).First(&user)
+	database1.DB.Where("name=?", username).First(&user)
 	if user.Role == "admin" {
 
 		var problem Problem
