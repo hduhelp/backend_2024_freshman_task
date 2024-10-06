@@ -1,0 +1,62 @@
+version: '3'
+services:
+  # 应用服务
+  app:
+    image: hdu-qa-platform:latest
+    container_name: hdu-qa-app
+    ports:
+      - "8082:8082"
+    environment:
+      - APP_NAME=HDU-QA-Platform
+      - VERSION=v1.0.1
+      - PORT=8082
+      - RUN_MODE=dev
+      - DB_HOST=mysql-for-qa
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=3223061
+      - DB_NAME=qa-platform
+      - REDIS_HOST=redis-for-qa
+      - REDIS_PORT=6379
+      - REDIS_PASSWD=
+    depends_on:
+      - db
+      - redis
+    networks:
+      - qa-network
+
+  # 自定义 MySQL 数据库服务
+  db:
+    image: mysql-for-qa
+    container_name: mysql-for-qa
+    environment:
+      - MYSQL_ROOT_PASSWORD=3223061
+      - MYSQL_DATABASE=qa-platform
+    ports:
+      - "33061:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - qa-network
+
+  # 自定义 Redis 服务
+  redis:
+    image: redis-for-qa:latest # 使用你自定义的 Redis 镜像
+    container_name: redis-for-qa
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=
+    command: redis-server --requirepass "" # 如果不需要密码，保持空字符串
+    volumes:
+      - redis-data:/data
+    networks:
+      - qa-network
+
+networks:
+  qa-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
