@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>登录</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    body { font-size: 0.825em; color: #eee; background: url("../img/bg.png") repeat-x #222222; font-family: Arial, Helvetica, sans-serif; padding-top: 100px; }
+    #carbonForm { background-color: #1C1C1C; border: 1px solid #080808; margin: 20px auto; padding-top: 20px; width: 500px; box-shadow: 0 0 1px #444 inset; border-radius: 12px; }
+    #carbonForm h1 { font-size: 60px; padding: 0 0 30px 10px; text-align: left; }
+    .fieldContainer { background-color: #1E1E1E; border: 1px solid #0E0E0E; padding: 30px 10px; box-shadow: 0 0 20px #292929 inset; border-radius: 12px; }
+    .formRow { height: 35px; padding: 10px; position: relative; }
+    .label { float: left; padding: 0 20px 0 0; text-align: right; width: 70px; }
+    .field { float: left; }
+    .field input { border: 1px solid white; color: #666666; font-size: 22px; padding: 4px 5px; background: #FFFFFF; outline: none; }
+    .signupButton { text-align: center; padding: 30px 0 10px; }
+    #submit { border: 1px solid #f4f4f4; cursor: pointer; height: 40px; text-transform: uppercase; width: 110px; background: #d0ecfd; border-radius: 6px; }
+    #submit:hover { background-color: #dcf2ff; border: 1px solid white; }
+    .error-message { color: red; text-align: center; margin-top: 10px; }
+    a, a:visited { color: #0196e3; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+  <script>
+    function submitLoginForm(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessageDiv = document.getElementById('error-message');
+
+      fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username, password })
+      })
+              .then(response => response.json())
+              .then(data => {
+                errorMessageDiv.textContent = data.message || data.error;
+                errorMessageDiv.style.color = data.message === "登录成功" ? 'green' : 'red';
+
+                if (data.message === "登录成功") {
+                  window.location.href = '/test';
+                }
+              })
+              .catch(error => {
+                errorMessageDiv.textContent = '登录请求失败: ' + error;
+                errorMessageDiv.style.color = 'red';
+              });
+    }
+  </script>
+</head>
+<body>
+<div id="carbonForm">
+  <h1>登录</h1>
+  <form id="loginForm" onsubmit="submitLoginForm(event)">
+    <div class="fieldContainer">
+      <div class="formRow">
+        <div class="label">
+          <label for="username">用户:</label>
+        </div>
+        <div class="field">
+          <input type="text" name="username" id="username" required />
+        </div>
+      </div>
+      <div class="formRow">
+        <div class="label">
+          <label for="password">密码:</label>
+        </div>
+        <div class="field">
+          <input type="password" name="password" id="password" required />
+        </div>
+      </div>
+    </div>
+    <div class="signupButton">
+      <input type="submit" id="submit" value="登录" />
+    </div>
+    <div class="error-message" id="error-message"></div>
+    <div class="signupButton">
+      <a href="/register">新用户注册</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>
