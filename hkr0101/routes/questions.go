@@ -15,10 +15,6 @@ func getCurUser(c *gin.Context) mymodels.User {
 	userID, _ := c.Get("userID")
 	username, _ := c.Get("username")
 	var user mymodels.User
-	c.JSON(http.StatusOK, gin.H{
-		"userID":   userID,
-		"username": username,
-	})
 	user.UserID = userID.(int)
 	user.Username = username.(string)
 	return user

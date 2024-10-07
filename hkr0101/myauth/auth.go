@@ -164,7 +164,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
+		//
 		// 从 claims 中提取用户信息
 		userID := (*claims)["userID"].(float64) // 注意：JWT中的数字会被解析为 float64 类型
 		username := (*claims)["username"].(string)

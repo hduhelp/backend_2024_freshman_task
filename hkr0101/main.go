@@ -29,6 +29,7 @@ func main() {
 	auth := r.Group("/api")
 	auth.Use(myauth.AuthMiddleware()) // 使用身份验证中间件
 	{
+
 		//创建问题
 		auth.POST("/questions", routes.CreateQuestion)
 		//创建答案
