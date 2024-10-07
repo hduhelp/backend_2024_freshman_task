@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/static/background.jpg'); /* 设置背景图片 */
+            background-size: cover; /* 覆盖整个页面 */
+            background-position: center; /* 将图片置于页面中心 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 5px 0;
+            flex-grow: 1;
+            min-width: calc(33% - 10px);
+            margin-right: 10px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        button:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>登录</h2>
+    <form action="/hdu.wiki/login" method="post">
+        <div class="input-container">
+            <label for="username"><b>学号</b></label>
+            <input type="text" placeholder="输入学号" name="username" required>
+        </div>
+        <div class="input-container">
+            <label for="password"><b>密码</b></label>
+            <input type="password" placeholder="输入密码" name="password" required>
+        </div>
+        <div class="button-container">
+            <button type="submit">登入</button>
+            <button type="button" onclick="window.location.href='/hdu.wiki/register'">注册</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+
+
