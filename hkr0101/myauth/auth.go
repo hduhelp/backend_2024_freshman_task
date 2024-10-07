@@ -92,6 +92,18 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	if err := db.DB.Where("user_id = ?", foundUser.UserID).First(&mymodels.OnlineUser{}).Error; err == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "用户已登录，无法重复登录"})
+		return
+	}
+	var onlineUser mymodels.OnlineUser
+	onlineUser.UserID = foundUser.UserID
+
+	if err := db.DB.Create(&onlineUser).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error creating onlineUser"})
+		return
+	}
+
 	if !checkPassword(foundUser.Password, user.Password) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid password"})
 		return
@@ -168,6 +180,18 @@ func AuthMiddleware() gin.HandlerFunc {
 // 登出处理 (JWT无状态不需要特殊登出逻辑，只需在客户端删除Token)
 
 func LogoutHandler(c *gin.Context) {
+
+	userID, _ := c.Get("userID")
+
+	if err := db.DB.Where("user_id = ?", userID).First(&mymodels.OnlineUser{}).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Logout unsuccessful"})
+		return
+	}
+
+	if err := db.DB.Delete(&mymodels.OnlineUser{}, userID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
 
