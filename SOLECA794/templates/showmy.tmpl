@@ -10,8 +10,12 @@
     function deletequestion(id) {
       var questionElement = document.getElementById(`question-${id}`);
       questionElement.style.textDecoration ="line-through";
+        var q1 = document.getElementById(`${id}-1`);
+        q1.style.textDecoration ="line-through";
+        var q2 = document.getElementById(`${id}-2`);
+        q2.style.textDecoration ="line-through";
       var num=id.toString()
-      fetch('http://127.0.0.1:8080/home/delete',{
+      fetch('http://127.0.0.1:8080/home/question/delete',{
         method:'DELETE',
         headers: {
           'Content-Type': 'text/plain'
@@ -26,15 +30,23 @@
   </script>
 </head>
 <body>
-<h2>问题列表</h2>
+<form action="/home/all" method="get">
+<h2 class="oneline">问题列表</h2>
+<button type="submit" class="oneline">返回首页</button>
+</form>
 <ul>
   {{ range .questions}}
         <p class="oneline">●</p>
         <li class="oneline" id="question-{{.ID}}">{{.From}} :</li>
-            <p class="oneline">{{.Time}}</p>
+            <p class="oneline" id="{{.ID}}-1">{{.Time}}</p>
         <button onclick="deletequestion({{.ID}})" class="oneline">删除</button>
-        <br><ul class="oneline">| {{.Content}}</ul><p class="oneline">  </p><button class="oneline">修改*</button>
-            <button class="oneline">查看回答*</button>
+        <br><ul class="oneline" id="{{.ID}}-2">| {{.Content}}</ul><p class="oneline"></p>
+        <form class="oneline" action="/home/{{ .ID }}/put" method="put">
+            <button >修改</button>
+        </form>
+        <form class="oneline" action="/home/{{ .ID }}/answer" method="get">
+            <button type="submit">查看回答</button>
+        </form>
         <br><br>
   {{else}}
         <li>没有提出问题</li>

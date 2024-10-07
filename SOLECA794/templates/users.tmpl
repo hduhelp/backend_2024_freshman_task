@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+    <style>
+        .oneline{display:inline;}
+    </style>
+    <script>
+        function delete(id) {
+            var questionElement = document.getElementById(`${id}-1`);
+            questionElement.style.textDecoration ="line-through";
+            var num=id.toString()
+            fetch('http://127.0.0.1:8080/home/user/delete',{
+                method:'DELETE',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: num
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+<h1>! 用户管理 !</h1>
+<form action="/home/all" method="get" class="oneline">
+    <button type="submit" class="oneline">返回首页</button>
+</form>
+<hr>
+      {{ range .User }}
+      <li class="oneline" id="{{.ID}}-1">用户: <{{.Name}}> : {{ .Email }}</li>
+      <button class="oneline" onclick="delete({{.ID}})">永久封号！</button>
+      <hr>
+      {{end}}
+</body>
+</html>

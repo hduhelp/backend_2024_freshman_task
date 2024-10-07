@@ -24,6 +24,13 @@ type Question struct {
 	From    string
 	Time    time.Time
 }
+type Answer struct {
+	ID      int
+	Content string
+	From    string
+	Quesid  int
+	Agree   int
+}
 
 var UserNow User
 
@@ -43,16 +50,7 @@ func main() {
 	if err != nil {
 		panic("connecting filed !!!")
 	}
-	db.AutoMigrate(&User{}, &Question{})
-	//重置自增主键
-	//db.Exec("ALTER TABLE users AUTO_INCREMENT = 1")
-
-	//查询某一个用户的方法
-	//a := db.Where("name = ? ", "SOLECA").First(&User{})
-	//if a.Error == gorm.ErrRecordNotFound {
-	//	u0 := User{Name: "SOLECA", Pass: "123123", Identy: 0}
-	//	db.Create(&u0)
-	//}
+	db.AutoMigrate(&User{}, &Question{}, &Answer{})
 
 	r.LoadHTMLGlob("templates/*")
 	r.GET("/", func(c *gin.Context) {
@@ -93,8 +91,9 @@ func main() {
 		email := c.PostForm("email")
 		submission := c.PostForm("submission")
 		var userSign User
+		er := db.Where("email = ? ", email).First(&userSign).Error
 		err := db.Where("name = ? ", username).First(&userSign).Error
-		if err == gorm.ErrRecordNotFound {
+		if err == gorm.ErrRecordNotFound && er == gorm.ErrRecordNotFound {
 			if submission == "123321" {
 				userSign = User{Name: username, Pass: password, Email: email, Identy: 0}
 				db.Create(&userSign)
@@ -107,13 +106,39 @@ func main() {
 				c.Redirect(http.StatusFound, "/")
 			}
 		} else {
-			c.HTML(http.StatusOK, "signup.tmpl", gin.H{
-				"text": "用户名重复！请重试",
-			})
+			var text string
+			if er != gorm.ErrRecordNotFound {
+				text = "该邮箱已经注册过了，请更换其他邮箱"
+				c.HTML(http.StatusOK, "signup.tmpl", gin.H{
+					"text": text,
+				})
+			} else {
+				text = "用户名已被使用，请更换其他用户名"
+				c.HTML(http.StatusOK, "signup.tmpl", gin.H{
+					"text": text,
+				})
+			}
+
 		}
 	})
-	r.GET("/reset", func(c *gin.Context) {
+	r.GET("/reset", IsLog, func(c *gin.Context) {
+		c.HTML(http.StatusOK, "reset.tmpl", nil)
 
+	})
+	r.POST("/reset", IsLog, func(c *gin.Context) {
+		pass := c.PostForm("pass")
+		email := c.PostForm("email")
+		if UserNow.Email != email {
+			c.HTML(http.StatusOK, "reset.tmpl", gin.H{
+				"message": "邮箱错误！",
+			})
+		} else {
+			UserNow.Pass = pass
+			db.Save(&UserNow)
+			c.HTML(http.StatusOK, "reset.tmpl", gin.H{
+				"message": "修改成功！",
+			})
+		}
 	})
 
 	//----------------------------------------------------------------------------
@@ -124,16 +149,17 @@ func main() {
 		}
 		v := UserNow.Identy
 		var questions []Question
-		err := db.Find(&questions).Error
-		if err != nil {
-			fmt.Println("this")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "NO QUESTIONS"})
-		}
+		db.Find(&questions)
+		//if err != nil {
+		//	fmt.Println("this")
+		//	c.JSON(http.StatusBadRequest, gin.H{"error": "NO QUESTIONS"})
+		//}
 		c.HTML(http.StatusOK, "home.tmpl", gin.H{
 			"Name":      UserNow.Name,
 			"V":         v,
 			"K":         1,
 			"questions": questions,
+			"User":      UserNow.Name,
 		})
 	})
 	home := r.Group("/home")
@@ -149,7 +175,7 @@ func main() {
 		})
 		home.GET("/manage", IsLog, func(c *gin.Context) {
 			if UserNow.Identy == 0 {
-				fmt.Println("ok")
+
 				v := UserNow.Identy
 				var questionss []Question
 				err := db.Find(&questionss).Error
@@ -165,6 +191,34 @@ func main() {
 				})
 			}
 		})
+		home.GET("/manage/users", IsLog, func(c *gin.Context) {
+			if UserNow.Identy == 0 {
+				var users []User
+				err := db.Find(&users).Error
+				if err != nil {
+					fmt.Println("this")
+					c.JSON(http.StatusBadRequest, gin.H{"error": "NO USERS"})
+				}
+				c.HTML(http.StatusOK, "users.tmpl", gin.H{
+					"User": users,
+				})
+			}
+		})
+		home.POST("/search", IsLog, func(c *gin.Context) {
+			username := c.PostForm("username")
+			var Q []Question
+			err := db.Where("`from` = ? ", username).Find(&Q).Error
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "NOT FOUND"})
+			}
+			c.HTML(http.StatusOK, "search.tmpl", gin.H{
+				"Name": username,
+				"Q":    Q,
+				"U":    UserNow.Name,
+				"I":    UserNow.Identy,
+			})
+
+		})
 		home.GET("/all", IsLog, func(c *gin.Context) {
 			v := UserNow.Identy
 			var questions []Question
@@ -177,6 +231,7 @@ func main() {
 				"V":         v,
 				"K":         1,
 				"questions": questions,
+				"User":      UserNow.Name,
 			})
 		})
 		home.GET("/my", IsLog, func(c *gin.Context) {
@@ -190,14 +245,93 @@ func main() {
 			})
 
 		})
-		home.POST("home/:id/answer", IsLog, func(c *gin.Context) {
+		home.POST("/:id/answer", IsLog, func(c *gin.Context) {
+			QuesId := c.Param("id")
+			Id, _ := strconv.Atoi(QuesId)
+			answer := c.PostForm("answer")
 
+			var ans Answer = Answer{Content: answer, From: UserNow.Name, Quesid: Id, Agree: 0}
+			db.Create(&ans)
+
+			c.Redirect(http.StatusFound, "/home/all")
 		})
-		home.DELETE("/delete", IsLog, func(c *gin.Context) {
+		home.GET("/:id/answer", IsLog, func(c *gin.Context) {
+			QuesId := c.Param("id")
+			var ans []Answer
+			db.Where(" quesid = ?", QuesId).Find(&ans)
+			var question Question
+			db.Where(" id = ?", QuesId).First(&question)
+			fro := question.From
+			content := question.Content
+			tim := question.Time
+			c.HTML(http.StatusOK, "showanswer.tmpl", gin.H{
+				"Content": content,
+				"Fro":     fro,
+				"Ans":     ans,
+				"Time":    tim,
+				"User":    UserNow.Name,
+				"Identy":  UserNow.Identy,
+			})
+		})
+		home.GET("/:id/put", IsLog, func(c *gin.Context) {
+			QuesId := c.Param("id")
+
+			var question Question
+			db.Where(" id = ?", QuesId).First(&question)
+
+			c.HTML(http.StatusOK, "change.tmpl", gin.H{
+				"Content": question.Content,
+				"Fro":     question.From,
+				"Time":    question.Time,
+				"ID":      question.ID,
+			})
+		})
+		home.POST("/:id/put", IsLog, func(c *gin.Context) {
+			QuesId := c.Param("id")
+			change := c.PostForm("change")
+			var question Question
+			db.Where(" id = ?", QuesId).First(&question)
+			if change != "" {
+				question.Content = change
+			}
+			db.Save(&question)
+			c.HTML(http.StatusOK, "change.tmpl", gin.H{
+				"Content":  question.Content,
+				"Fro":      question.From,
+				"Time":     question.Time,
+				"ID":       question.ID,
+				"Response": "修改成功！",
+			})
+		})
+		home.DELETE("/question/delete", IsLog, func(c *gin.Context) {
 			body, _ := io.ReadAll(c.Request.Body)
 			// 将字符串转换为数值
 			receive, _ := strconv.Atoi(string(body))
 			db.Where("id = ?", receive).Delete(&Question{})
+		})
+		home.DELETE("/answer/delete", IsLog, func(c *gin.Context) {
+			body, _ := io.ReadAll(c.Request.Body)
+			// 将字符串转换为数值
+			receive, _ := strconv.Atoi(string(body))
+			db.Where("id = ?", receive).Delete(&Answer{})
+		})
+		home.DELETE("/user/delete", IsLog, func(c *gin.Context) {
+			body, _ := io.ReadAll(c.Request.Body)
+			// 将字符串转换为数值
+			receive, _ := strconv.Atoi(string(body))
+			db.Where("id = ?", receive).Delete(&User{})
+		})
+		home.POST("/answer/agree", IsLog, func(c *gin.Context) {
+			body, _ := io.ReadAll(c.Request.Body)
+			receive, _ := strconv.Atoi(string(body))
+			var answer Answer
+			db.Where("id = ?", receive).First(&answer)
+			answer.Agree = answer.Agree + 1
+			db.Save(&answer)
+			id := strconv.Itoa(answer.Quesid)
+			id = "/home/" + id + "/answer"
+			c.Redirect(http.StatusFound, id)
+
 		})
 	}
 	r.Run(":8080")
