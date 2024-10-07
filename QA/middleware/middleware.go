@@ -2,12 +2,12 @@ package middleware
 
 import (
 	"QA/auth"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 )
 
+// JWTMiddleware 是用于Gin框架的JWT认证中间件
 func JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -23,19 +23,13 @@ func JWTMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		claims, ok := token.Claims.(jwt.MapClaims)
+		claims, ok := token.Claims.(*auth.MyClaims)
 		if !ok {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid claims"})
 			c.Abort()
 			return
 		}
-		userID, ok := claims["id"].(string)
-		if !ok {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
-			c.Abort()
-			return
-		}
-		c.Set("userID", userID)
+		c.Set("username", claims.Username)
 		c.Next()
 	}
 }
