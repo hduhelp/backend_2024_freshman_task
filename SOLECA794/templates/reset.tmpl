@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reset</title>
+</head>
+<body>
+<h1>简洁明了的重置界面( )</h1>
+{{.message}}
+<hr>
+<form action="/reset" method="post">
+    <label>验证邮箱:</label>
+    <input name="email" required>
+<label>输入新的密码:</label>
+<input  name="pass" required>
+<button>确认</button>
+
+</form>
+<form action="/home/all" method="get" class="oneline">
+    <button type="submit" class="oneline">返回首页</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+    <style>
+        .oneline{display: inline;}
+    </style>
+    <script>
+      function deleteans(id){
+        var q1 = document.getElementById(`${id}-1`);
+        q1.style.textDecoration ="line-through";
+        var num=id.toString()
+        fetch('http://127.0.0.1:8080/home/question/delete',{
+          method:'DELETE',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
+          body: num
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+      }
+
+    </script>
+</head>
+<body>
+{{ $u := .U }}
+{{ $i := .I }}
+    <h2 > ▶&nbsp;"{{ .Name }}"的提问</h2>
+<form action="/home/all" method="get" class="oneline">
+    <button type="submit" class="oneline">返回首页</button>
+</form>
+    <hr>
+    {{ range .Q }}
+        <p class="left3 oneline font1 ">| ▪ &nbsp;&nbsp;</p><p class="strong1 oneline" id="{{ .ID }}-1"> “{{ .Content }}”  &nbsp; </p>
+        {{ if eq  0 $i}}
+            <button onclick="deleteans({{.ID}})">删除该回答</button>
+        {{else}}
+            {{ if eq .From $u}}
+             <button onclick="deleteans({{.ID}})">删除我的提问</button>
+             <form class="oneline" action="/home/{{ .ID }}/put" method="put">
+                 <button >修改</button>
+             </form>
+            {{end}}
+
+        {{end}}
+
+        <br><br>
+    {{else}}
+    <li>没有回答</li>
+    {{end}}
+</body>
+</html>

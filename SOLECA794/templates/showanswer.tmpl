@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Answers</title>
+    <style>
+      .oneline{display:inline;}
+      .left{margin-left: 30px;}
+      .left3{margin-left: 50px;}
+      .left4{padding-left: 10px;}
+      .up{margin-top: 10px;}
+      .down2{margin-bottom: 5px;}
+      .down3{margin-bottom: 15px;}
+      .font1{font-size:20px}
+      .strong1{font-weight: bold;}
+    </style>
+    <script>
+        function deleteans(id){
+            var q1 = document.getElementById(`${id}-1`);
+            q1.style.textDecoration ="line-through";
+            var q2 = document.getElementById(`${id}-2`);
+            q2.style.textDecoration ="line-through";
+            var num=id.toString()
+            fetch('http://127.0.0.1:8080/home/answer/delete',{
+                method:'DELETE',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: num
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
+        }
+        function agree(id){
+            var num=id.toString()
+            fetch('http://127.0.0.1:8080/home/answer/agree',{
+                method:'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: num
+            })
+
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
+        }
+        function reload(){
+            location.reload();
+            location.reload();
+        }
+    </script>
+</head>
+<body>
+    <h2 class="down3"> ▶&nbsp;"{{ .Content }}"</h2>
+    <h4 class="left  down2 up">|&nbsp; Answered by : &nbsp;&nbsp;< {{ .Fro }} > </h4>
+    <h6 class="left down2 up oneline" > | {{ .Time }}</h6>
+    <form action="/home/all" method="get" class="oneline">
+        <button type="submit" class="oneline">返回首页</button>
+    </form>
+    <hr><br>
+    {{ $u :=.User}}
+    {{ $i :=.Identy }}
+    {{ range .Ans }}
+        <p class="left3 oneline font1 ">| ▪ &nbsp;&nbsp;</p><p class="strong1 oneline" id="{{ .ID }}-1"> <{{ .From }}> : &nbsp; </p>
+        <ul class="oneline left4 font1" id="{{ .ID }}-2">{{.Content}}</ul>
+
+        {{ if eq  0 $i}}
+            <button onclick="deleteans({{.ID}})">删除该回答</button>
+        {{else}}
+                {{ if eq .From $u}}
+                    <button onclick="deleteans({{.ID}})">删除我的回答</button>
+                {{end}}
+        {{end}}
+        <button onclick="agree({{.ID}});reload()">点赞♥{{ .Agree }}</button>
+        <br><br>
+    {{else}}
+    <li>没有回答</li>
+    {{end}}
+</body>
+</html>
