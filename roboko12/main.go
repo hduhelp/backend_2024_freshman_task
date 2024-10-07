@@ -40,13 +40,22 @@ type AgreeOrNot struct {
 	DisagreeNum uint
 }
 
-// 对答案的评论结构体
+// 答案中的评论结构体
 type Comment struct {
 	gorm.Model
 	AgreeOrNot
 	Content  string
 	UserID   uint
 	AnswerID uint
+}
+
+// 回复评论结构体
+type ReplyComment struct {
+	gorm.Model
+	CommentUserID  uint
+	CommentID      uint
+	ReplyCommentID uint
+	ReplyUserID    uint
 }
 
 // 答案结构体
@@ -76,7 +85,7 @@ func main() {
 	if err != nil {
 		log.Fatal("数据库连接失败:", err)
 	}
-	db.AutoMigrate(&User{}, &Question{}, &Answer{}, &Comment{})
+	db.AutoMigrate(&User{}, &Question{}, &Answer{}, &Comment{}, &ReplyComment{})
 
 	r := gin.Default()
 
@@ -96,6 +105,8 @@ func main() {
 		v_post.POST("questions/:question_id/answers", CreateAnswer)
 		// 评论答案,需要查询参数，传入答案id和所属问题id
 		v_post.POST("questions/answers/comments", CreateCommentToAnswer)
+		//回复其他评论,需要传入查询参数，传入其他评论id和所属答案id
+		v_post.POST("questions/answers/comments/comments", CreateReplyToComment)
 
 	}
 
@@ -109,6 +120,9 @@ func main() {
 		v_get.GET("deleted_questions", GetDeletedQuestions)
 		//按关键词搜索问题
 		v_get.GET("questions/search", SearchQuestionsByKeyword)
+		//查看对自己评论的回复
+		v_get.GET("questions/answers/comments/comments", GetReplysToSelf)
+
 	}
 
 	v_put := r.Group("/")

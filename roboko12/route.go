@@ -372,6 +372,7 @@ func RestoreQuestion(c *gin.Context) {
 		return
 	}
 	question.IsDeleted = false
+	db.Unscoped().Model(&question).Update("deleted_at", nil)
 	if err := db.Save(&question).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -407,6 +408,7 @@ func DeleteQuestion(c *gin.Context) {
 		deleted_questions.deleted[id] = question
 		question.Deleted_Time = time.Now()
 		question.IsDeleted = true
+		db.Delete(&question)
 		if err := db.Save(&question).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -444,11 +446,11 @@ func DeleteQuestionForever(c *gin.Context) {
 
 	id := c.Param("id")
 	var question Question
-	if err := db.Where("id =?", id).First(&question).Error; err != nil {
+	if err := db.Where("id =?", id).Unscoped().First(&question).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if question.UserID != user_id && CheckManager(user_id) == false {
+	if question.UserID != user_id && !CheckManager(user_id) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "您没有权限删除该问题"})
 		return
 	}
@@ -666,7 +668,7 @@ func DeleteCommentToAnswer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if comment.UserID != userID.(uint) && CheckManager(userID.(uint)) == false {
+	if comment.UserID != userID.(uint) && !CheckManager(userID.(uint)) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "您没有权限删除该问题"})
 		return
 	}
@@ -727,7 +729,7 @@ func DeleteCommentForever(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if comment.UserID != userID.(uint) && CheckManager(userID.(uint)) == false {
+	if comment.UserID != userID.(uint) && !CheckManager(userID.(uint)) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "您没有权限删除该问题"})
 		return
 	}
@@ -746,6 +748,7 @@ func DeleteCommentForever(c *gin.Context) {
 
 // 关键词搜索
 func SearchQuestionsByKeyword(c *gin.Context) {
+
 	var keyword KeyWord
 	if err := c.ShouldBindJSON(&keyword); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数有误"})
@@ -763,4 +766,98 @@ func SearchQuestionsByKeyword(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"questions": questions})
+}
+
+// 对其他评论的评论进行回复
+func CreateReplyToComment(c *gin.Context) {
+	userID := CheckLogin(c)
+	if userID == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "请先登录"})
+		return
+	}
+	answer_id := c.Query("answer_id")
+	comment_id := c.Query("comment_id")
+	if answer_id == "" || comment_id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数有误"})
+		return
+	}
+	var reply Comment
+	var comment Comment
+	var answer Answer
+	if c.ShouldBindJSON(&reply) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数有误"})
+		return
+	}
+	if reply.Content == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "评论内容不能为空"})
+		return
+	}
+
+	if err := db.Where("id =?", comment_id).First(&comment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := db.Where("id =?", answer_id).First(&answer).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	reply.UserID = userID.(uint)
+	reply.AnswerID = answer.ID
+
+	if err := db.Save(&reply).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := db.Save(&comment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := db.Save(&answer).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	var replyComment ReplyComment
+	replyComment.ReplyCommentID = reply.ID
+	replyComment.CommentID = comment.ID
+	replyComment.ReplyUserID = userID.(uint)
+	replyComment.CommentUserID = comment.UserID
+	if err := db.Save(&replyComment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "评论成功"})
+
+}
+
+//查看对自己的回复
+
+func GetReplysToSelf(c *gin.Context) {
+	userID := CheckLogin(c)
+	if userID == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "请先登录"})
+		return
+	}
+
+	var replys []Comment
+	var replyComment []ReplyComment
+	//查找CommentUserID = userID的所有回复
+	if err := db.Where("comment_user_id =?", userID.(uint)).Order("created_at desc").Find(&replyComment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for _, v := range replyComment {
+		var newReplys []Comment
+		if err := db.Where("id =?", v.ReplyCommentID).Find(&newReplys).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		replys = append(replys, newReplys...)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"replys": replys})
 }
